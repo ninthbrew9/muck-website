@@ -1,29 +1,54 @@
 /* ─── Eircode routing keys by coverage zone ─────────────────────────────── */
 const COVERAGE = {
   inArea: new Set([
-    // Co. Wicklow
-    'A63', 'A67', 'A98',
-    // Co. Wexford
-    'Y21', 'Y25', 'Y34', 'Y35',
+    // Co. Wicklow — Bray, Greystones, Kilcoole, Newcastle
+    'A98',
+    // Co. Wicklow — Wicklow town, Rathnew, Ashford, Rathdrum, Aughrim
+    'A67', 'A63',
+    // Co. Wicklow — Arklow, Shillelagh, Tinahely
+    'Y14',
+    // Co. Wexford — Wexford town, Rosslare
+    'Y21', 'Y35',
+    // Co. Wexford — Enniscorthy, Ferns, Bunclody
+    'Y21', 'Y25',
+    // Co. Wexford — Gorey, Courtown, Carnew
+    'Y34',
+    // Co. Wexford — New Ross, Campile
+    'Y22',
   ]),
   nearby: new Set([
-    // Co. Dublin south / border
-    'D18', 'D24',
-    // Co. Carlow
+    // Co. Dublin south — Dun Laoghaire, Cabinteely, Shankill
+    'D18', 'D24', 'A94',
+    // Co. Carlow — Carlow town, Tullow, Muinebheag
     'R21', 'R32', 'R93',
-    // Co. Kilkenny
-    'R95',
-    // Co. Kildare south
-    'R51', 'W91',
+    // Co. Kilkenny — Kilkenny city, Thomastown, Callan
+    'R95', 'R51',
+    // Co. Kildare south — Athy, Castledermot
+    'R14', 'W91',
+    // Co. Waterford border
+    'X91',
   ]),
 };
 
-/* ─── Placeholder pricing (edit these values to set real rates) ─────────── */
+/* ─── Pricing — calibrated for Co. Wicklow & Co. Wexford (2025) ─────────── *
+ *                                                                            *
+ *  Pressure washing  : €5/m² × 35% of floor area (block paving / concrete)  *
+ *                      Research range: €120–€350 for typical Irish property   *
+ *                                                                            *
+ *  Roof cleaning     : €12/m² × 55% of floor area (soft wash + biocide)     *
+ *                      Research range: €350–€1,100 by property size          *
+ *                                                                            *
+ *  Gutter cleaning   : flat rate by size band                                *
+ *                      Research range: €90–€240 typical Irish property       *
+ *                                                                            *
+ *  Window cleaning   : €4.50/m² × 14% of floor area (one-off external)      *
+ *                      Research range: €50–€100 by property size             *
+ * ─────────────────────────────────────────────────────────────────────────── */
 const RATES = {
-  pressureWashing: { perSqm: 6,  areaRatio: 0.5  },  // €/m² of driveway proxy
-  roofCleaning:    { perSqm: 12, areaRatio: 0.85 },  // €/m² of roof area proxy
-  gutterCleaning:  { flat: { small: 100, medium: 150, large: 220 } },
-  windowCleaning:  { perSqm: 4,  areaRatio: 0.15 },  // €/m² of window area proxy
+  pressureWashing: { perSqm: 5,    areaRatio: 0.35 },
+  roofCleaning:    { perSqm: 12,   areaRatio: 0.55 },
+  gutterCleaning:  { flat: { small: 100, medium: 145, large: 195 } },
+  windowCleaning:  { perSqm: 4.5,  areaRatio: 0.14 },
 };
 
 const PROPERTY_SIZES = { small: 80, medium: 120, large: 200 };
