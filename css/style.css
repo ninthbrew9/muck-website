@@ -240,12 +240,18 @@ a { text-decoration: none; color: inherit; }
 }
 .ba-before-wrap {
   position: absolute;
-  inset: 0;
-  clip-path: inset(0 50% 0 0);
+  top: 0; left: 0; bottom: 0;
+  width: 50%;
+  overflow: hidden;
 }
 .ba-before-wrap .ba-img {
-  width: 100%;
+  /* width is set by JS to match the full slider width */
+  position: absolute;
+  top: 0; left: 0;
   height: 100%;
+  max-width: none;
+  object-fit: cover;
+  object-position: center;
 }
 .ba-divider {
   position: absolute;

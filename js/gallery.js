@@ -1,25 +1,37 @@
 document.querySelectorAll('.ba-slider').forEach(slider => {
   const beforeWrap = slider.querySelector('.ba-before-wrap');
+  const beforeImg  = beforeWrap.querySelector('.ba-img');
   const divider    = slider.querySelector('.ba-divider');
   let dragging = false;
 
+  // Pin the before image to the full slider width so it never shrinks with the wrapper
+  function syncWidth() {
+    beforeImg.style.width = slider.offsetWidth + 'px';
+  }
+
   function setPosition(x) {
     const rect = slider.getBoundingClientRect();
-    let pct = (x - rect.left) / rect.width;
-    pct = Math.max(0.02, Math.min(0.98, pct));
-    const p = (pct * 100).toFixed(2);
-    beforeWrap.style.clipPath = `inset(0 ${(100 - pct * 100).toFixed(2)}% 0 0)`;
-    divider.style.left        = p + '%';
+    let pct    = (x - rect.left) / rect.width;
+    pct        = Math.max(0.02, Math.min(0.98, pct));
+    const p    = (pct * 100).toFixed(2) + '%';
+    beforeWrap.style.width = p;   // clip the before image
+    divider.style.left     = p;   // move the line to exactly the same position
   }
 
   // Mouse
-  slider.addEventListener('mousedown', e => { dragging = true; setPosition(e.clientX); e.preventDefault(); });
+  slider.addEventListener('mousedown', e => {
+    dragging = true;
+    syncWidth();
+    setPosition(e.clientX);
+    e.preventDefault();
+  });
   window.addEventListener('mousemove', e => { if (dragging) setPosition(e.clientX); });
   window.addEventListener('mouseup',   () => { dragging = false; });
 
   // Touch
   slider.addEventListener('touchstart', e => {
     dragging = true;
+    syncWidth();
     setPosition(e.touches[0].clientX);
     e.preventDefault();
   }, { passive: false });
@@ -27,32 +39,8 @@ document.querySelectorAll('.ba-slider').forEach(slider => {
     if (dragging) setPosition(e.touches[0].clientX);
   }, { passive: true });
   window.addEventListener('touchend', () => { dragging = false; });
-});
 
-// Fade-in on scroll
-const observer = new IntersectionObserver(entries => {
-  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
-}, { threshold: 0.12 });
-document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
-
-// Nav scroll style
-const nav = document.getElementById('nav');
-window.addEventListener('scroll', () => {
-  nav.classList.toggle('scrolled', window.scrollY > 40);
-}, { passive: true });
-
-// Hamburger
-const hamburger = document.getElementById('hamburger');
-const navLinks  = document.getElementById('nav-links');
-hamburger?.addEventListener('click', () => {
-  const open = hamburger.classList.toggle('open');
-  navLinks.classList.toggle('open', open);
-  hamburger.setAttribute('aria-expanded', open);
-});
-navLinks?.querySelectorAll('a').forEach(a => {
-  a.addEventListener('click', () => {
-    hamburger.classList.remove('open');
-    navLinks.classList.remove('open');
-    hamburger.setAttribute('aria-expanded', false);
-  });
+  // Initialise width on load and on resize
+  syncWidth();
+  window.addEventListener('resize', syncWidth);
 });
