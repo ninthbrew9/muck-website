@@ -7,9 +7,9 @@ document.querySelectorAll('.ba-slider').forEach(slider => {
     const rect = slider.getBoundingClientRect();
     let pct = (x - rect.left) / rect.width;
     pct = Math.max(0.02, Math.min(0.98, pct));
-    const p = (pct * 100).toFixed(2) + '%';
-    beforeWrap.style.width = p;
-    divider.style.left     = p;
+    const p = (pct * 100).toFixed(2);
+    beforeWrap.style.clipPath = `inset(0 ${(100 - pct * 100).toFixed(2)}% 0 0)`;
+    divider.style.left        = p + '%';
   }
 
   // Mouse
