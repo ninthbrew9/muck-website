@@ -53,7 +53,8 @@ const RATES = {
 
 const PROPERTY_SIZES = { small: 80, medium: 120, large: 200 };
 
-const WHATSAPP_NUMBER = '353XXXXXXXXX'; // ← replace with real number
+const WHATSAPP_NUMBER  = '353XXXXXXXXX';       // ← replace with real number e.g. 353861234567
+const WEB3FORMS_KEY   = 'YOUR_WEB3FORMS_KEY'; // ← paste key from web3forms.com
 
 /* ─── State ─────────────────────────────────────────────────────────────── */
 let state = { step: 1, eircode: '', zone: null, services: [], sizeBand: 'medium', customSqm: null, windowCount: 8 };
@@ -98,10 +99,31 @@ function serviceLabel(key) {
   return { pressure: 'Pressure Washing', roof: 'Roof Cleaning', gutters: 'Gutter Cleaning', windows: 'Window Cleaning' }[key];
 }
 
-function buildWhatsAppUrl(eircode, services, low, high) {
+function buildWhatsAppUrl(name, phone, eircode, services, low, high) {
   const serviceNames = services.map(serviceLabel).join(', ');
-  const msg = `Hi MUCK! I got an online estimate for ${serviceNames} at ${eircode} — approx €${low}–€${high}. I'd like to book!`;
+  const msg = `Hi MUCK! I'm ${name} (${phone}). I got an online estimate for ${serviceNames} at ${eircode} — approx €${low}–€${high}. I'd like to book!`;
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
+}
+
+async function submitToEmail(name, phone, email, eircode, services, low, high) {
+  const serviceNames = services.map(serviceLabel).join(', ');
+  const payload = {
+    access_key:  WEB3FORMS_KEY,
+    subject:     `New Quote Request — ${serviceNames} — ${eircode}`,
+    from_name:   'MUCK Website',
+    name,
+    phone,
+    email:       email || 'Not provided',
+    eircode,
+    services:    serviceNames,
+    estimate:    `€${low} – €${high}`,
+  };
+  const res = await fetch('https://api.web3forms.com/submit', {
+    method:  'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body:    JSON.stringify(payload),
+  });
+  return res.ok;
 }
 
 /* ─── UI helpers ─────────────────────────────────────────────────────────── */
@@ -162,31 +184,67 @@ function goResult() {
   state.customSqm = (!isNaN(customVal) && customVal > 0) ? customVal : null;
 
   const { low, high } = calcEstimate(state.services, state.sizeBand, state.customSqm, state.windowCount);
+  state.low  = low;
+  state.high = high;
 
   document.getElementById('result-range').textContent = `€${low} – €${high}`;
-  document.getElementById('result-services').textContent =
-    state.services.map(serviceLabel).join(' · ');
+  document.getElementById('result-services').textContent = state.services.map(serviceLabel).join(' · ');
 
-  const noteEl = document.getElementById('result-area-note');
+  const noteEl  = document.getElementById('result-area-note');
   const noteMap = {
-    inArea:  { text: '✓ In our service area',            cls: 'green' },
-    nearby:  { text: '⚠ Distance charge may apply',      cls: '' },
+    inArea:  { text: '✓ In our service area',                              cls: 'green' },
+    nearby:  { text: '⚠ Distance charge may apply',                        cls: '' },
     outside: { text: '⚠ Outside standard area — we\'ll confirm availability', cls: '' },
   };
   const note = noteMap[state.zone];
   noteEl.textContent = note.text;
   noteEl.className   = `result-area-note${note.cls ? ' ' + note.cls : ''}`;
 
-  const waBtn = document.getElementById('result-whatsapp-btn');
-  waBtn.href  = buildWhatsAppUrl(state.eircode, state.services, low, high);
+  // Clear any previous contact details / status
+  document.getElementById('lead-name').value  = '';
+  document.getElementById('lead-phone').value = '';
+  document.getElementById('lead-email').value = '';
+  document.getElementById('submit-status').textContent = '';
+  document.getElementById('submit-status').className   = 'submit-status';
 
   showPanel(4);
 }
 
+async function handleSubmit() {
+  const name  = document.getElementById('lead-name').value.trim();
+  const phone = document.getElementById('lead-phone').value.trim();
+  const email = document.getElementById('lead-email').value.trim();
+  const statusEl = document.getElementById('submit-status');
+
+  // Validate
+  if (!name)  { statusEl.textContent = 'Please enter your name.';         statusEl.className = 'submit-status error'; return; }
+  if (!phone) { statusEl.textContent = 'Please enter your phone number.'; statusEl.className = 'submit-status error'; return; }
+
+  const btn = document.getElementById('result-submit-btn');
+  btn.disabled    = true;
+  btn.textContent = 'Sending…';
+  statusEl.textContent = '';
+
+  // Send email
+  await submitToEmail(name, phone, email, state.eircode, state.services, state.low, state.high);
+
+  // Open WhatsApp
+  const waUrl = buildWhatsAppUrl(name, phone, state.eircode, state.services, state.low, state.high);
+  window.open(waUrl, '_blank');
+
+  // Confirm to user
+  btn.textContent      = '✓ Sent! Opening WhatsApp…';
+  statusEl.textContent = 'Quote sent — we\'ll be in touch shortly.';
+  statusEl.className   = 'submit-status ok';
+}
+
 function resetQuote() {
-  state = { step: 1, eircode: '', zone: null, services: [], sizeBand: 'medium', customSqm: null, windowCount: 8 };
+  state = { step: 1, eircode: '', zone: null, services: [], sizeBand: 'medium', customSqm: null, windowCount: 8, low: 0, high: 0 };
   document.getElementById('window-count-display').textContent = '8';
   document.getElementById('window-count-row').classList.remove('visible');
+  const btn = document.getElementById('result-submit-btn');
+  btn.disabled    = false;
+  btn.innerHTML   = '<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg> Send Quote &amp; Book on WhatsApp';
   document.getElementById('eircode-input').value = '';
   setEircodeStatus('', '');
   document.querySelectorAll('.service-check').forEach(c => { c.checked = false; });
@@ -268,6 +326,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btn-next-3').addEventListener('click', goResult);
   document.getElementById('btn-back-2').addEventListener('click', () => showPanel(1));
   document.getElementById('btn-back-3').addEventListener('click', () => showPanel(2));
+  document.getElementById('result-submit-btn').addEventListener('click', handleSubmit);
   document.getElementById('btn-reset').addEventListener('click', resetQuote);
 
   /* Allow Enter key on Eircode input */

@@ -483,6 +483,20 @@ a { text-decoration: none; color: inherit; }
   margin-bottom: 1.75rem;
 }
 .result-area-note.green { background: #e8f9f0; color: #1a6b40; }
+/* Contact fields in result panel */
+.contact-fields {
+  width: 100%;
+  text-align: left;
+  margin-top: 1.25rem;
+  border-top: 1.5px solid #eee;
+  padding-top: 1.25rem;
+}
+.contact-intro { font-size: 0.92rem; font-weight: 600; color: var(--text); margin-bottom: 1rem; }
+.required-star { color: #e03a3a; margin-left: 2px; }
+.optional-label { font-size: 0.8rem; color: #aaa; font-weight: 400; }
+.submit-status { min-height: 1.4em; font-size: 0.88rem; font-weight: 600; margin-top: 0.5rem; text-align: center; }
+.submit-status.error { color: #c03a3a; }
+.submit-status.ok    { color: #1a9a5a; }
 .result-whatsapp { margin-top: 1rem; width: 100%; justify-content: center; font-size: 1.1rem; padding: 1rem 2rem; }
 .result-disclaimer { margin-top: 1.25rem; font-size: 0.78rem; color: #aaa; max-width: 380px; margin-left: auto; margin-right: auto; }
 .result-reset { margin-top: 1rem; background: none; border: none; color: var(--text-light); font-size: 0.85rem; cursor: pointer; text-decoration: underline; }
