@@ -45,10 +45,10 @@ const COVERAGE = {
  *                      Research range: €50–€100 by property size             *
  * ─────────────────────────────────────────────────────────────────────────── */
 const RATES = {
-  pressureWashing: { perSqm: 5,    areaRatio: 0.35 },
-  roofCleaning:    { perSqm: 12,   areaRatio: 0.55 },
+  pressureWashing: { perSqm: 5,   areaRatio: 0.35 },
+  roofCleaning:    { perSqm: 8,   areaRatio: 0.55 },  // reduced — mid Wicklow/Wexford rate
   gutterCleaning:  { flat: { small: 100, medium: 145, large: 195 } },
-  windowCleaning:  { perSqm: 4.5,  areaRatio: 0.14 },
+  windowCleaning:  { perWindow: 6 },                   // €6 per window, count entered by user
 };
 
 const PROPERTY_SIZES = { small: 80, medium: 120, large: 200 };
@@ -56,7 +56,7 @@ const PROPERTY_SIZES = { small: 80, medium: 120, large: 200 };
 const WHATSAPP_NUMBER = '353XXXXXXXXX'; // ← replace with real number
 
 /* ─── State ─────────────────────────────────────────────────────────────── */
-let state = { step: 1, eircode: '', zone: null, services: [], sizeBand: 'medium', customSqm: null };
+let state = { step: 1, eircode: '', zone: null, services: [], sizeBand: 'medium', customSqm: null, windowCount: 8 };
 
 /* ─── Eircode helpers ────────────────────────────────────────────────────── */
 function parseEircode(raw) {
@@ -72,7 +72,7 @@ function getZone(routing) {
 }
 
 /* ─── Calculation ────────────────────────────────────────────────────────── */
-function calcEstimate(services, sizeBand, customSqm) {
+function calcEstimate(services, sizeBand, customSqm, windowCount) {
   const sqm = customSqm || PROPERTY_SIZES[sizeBand] || PROPERTY_SIZES.medium;
   let total = 0;
 
@@ -86,7 +86,7 @@ function calcEstimate(services, sizeBand, customSqm) {
     total += RATES.gutterCleaning.flat[sizeBand] || RATES.gutterCleaning.flat.medium;
   }
   if (services.includes('windows')) {
-    total += sqm * RATES.windowCleaning.areaRatio * RATES.windowCleaning.perSqm;
+    total += (windowCount || 8) * RATES.windowCleaning.perWindow;
   }
 
   const low  = Math.round(total * 0.8 / 5) * 5;
@@ -161,7 +161,7 @@ function goResult() {
   state.sizeBand  = sizeRadio ? sizeRadio.value : 'medium';
   state.customSqm = (!isNaN(customVal) && customVal > 0) ? customVal : null;
 
-  const { low, high } = calcEstimate(state.services, state.sizeBand, state.customSqm);
+  const { low, high } = calcEstimate(state.services, state.sizeBand, state.customSqm, state.windowCount);
 
   document.getElementById('result-range').textContent = `€${low} – €${high}`;
   document.getElementById('result-services').textContent =
@@ -184,7 +184,9 @@ function goResult() {
 }
 
 function resetQuote() {
-  state = { step: 1, eircode: '', zone: null, services: [], sizeBand: 'medium', customSqm: null };
+  state = { step: 1, eircode: '', zone: null, services: [], sizeBand: 'medium', customSqm: null, windowCount: 8 };
+  document.getElementById('window-count-display').textContent = '8';
+  document.getElementById('window-count-row').classList.remove('visible');
   document.getElementById('eircode-input').value = '';
   setEircodeStatus('', '');
   document.querySelectorAll('.service-check').forEach(c => { c.checked = false; });
@@ -229,7 +231,27 @@ document.addEventListener('DOMContentLoaded', () => {
   /* Service checkboxes */
   document.querySelectorAll('.check-label').forEach(label => {
     const cb = label.querySelector('input');
-    cb.addEventListener('change', () => label.classList.toggle('checked', cb.checked));
+    cb.addEventListener('change', () => {
+      label.classList.toggle('checked', cb.checked);
+      // Show/hide window counter
+      if (cb.value === 'windows') {
+        document.getElementById('window-count-row').classList.toggle('visible', cb.checked);
+      }
+    });
+  });
+
+  /* Window counter buttons */
+  document.getElementById('window-minus').addEventListener('click', () => {
+    if (state.windowCount > 1) {
+      state.windowCount--;
+      document.getElementById('window-count-display').textContent = state.windowCount;
+    }
+  });
+  document.getElementById('window-plus').addEventListener('click', () => {
+    if (state.windowCount < 60) {
+      state.windowCount++;
+      document.getElementById('window-count-display').textContent = state.windowCount;
+    }
   });
 
   /* Size radio visual */

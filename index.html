@@ -257,7 +257,16 @@
               <label class="check-label"><input type="checkbox" class="service-check" value="pressure" /> Pressure Washing</label>
               <label class="check-label"><input type="checkbox" class="service-check" value="roof" /> Roof Cleaning</label>
               <label class="check-label"><input type="checkbox" class="service-check" value="gutters" /> Gutter Cleaning</label>
-              <label class="check-label"><input type="checkbox" class="service-check" value="windows" /> Window Cleaning</label>
+              <label class="check-label"><input type="checkbox" class="service-check" value="windows" id="cb-windows" /> Window Cleaning</label>
+            </div>
+            <!-- Window count — shown only when Window Cleaning is ticked -->
+            <div class="window-count-row" id="window-count-row">
+              <span class="window-count-label">How many windows?</span>
+              <div class="window-counter">
+                <button type="button" class="counter-btn" id="window-minus">&#8722;</button>
+                <span class="counter-value" id="window-count-display">8</span>
+                <button type="button" class="counter-btn" id="window-plus">&#43;</button>
+              </div>
             </div>
           </div>
           <div class="quote-nav">
