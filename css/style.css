@@ -131,8 +131,10 @@ a { text-decoration: none; color: inherit; }
   color: rgba(255,255,255,0.88);
   margin-bottom: 2.25rem;
   font-weight: 400;
+  line-height: 1.6;  /* override h1 default */
 }
 .hero-tagline strong { color: var(--yellow); font-weight: 700; }
+.hero-tagline span   { font-weight: 400; }
 .hero-ctas { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
 .hero-scroll-hint {
   position: absolute;
@@ -522,6 +524,9 @@ a { text-decoration: none; color: inherit; }
 /* ===== FOOTER ===== */
 #footer { background: #111; color: rgba(255,255,255,0.6); padding: 3rem 0 2rem; text-align: center; }
 .footer-logo { height: 90px; margin: 0 auto 1.5rem; }
+.footer-contact-email { margin-bottom: 1rem; }
+.footer-email-link { color: var(--teal); text-decoration: none; font-size: 0.95rem; }
+.footer-email-link:hover { text-decoration: underline; }
 .footer-whatsapp { margin-bottom: 2rem; }
 .footer-contact { font-size: 0.9rem; margin-bottom: 0.75rem; }
 .footer-contact a { color: var(--teal); text-decoration: none; }
