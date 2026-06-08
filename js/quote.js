@@ -54,7 +54,7 @@ const RATES = {
 const PROPERTY_SIZES = { small: 80, medium: 120, large: 200 };
 
 const WHATSAPP_NUMBER  = '353XXXXXXXXX';       // ← replace with real number e.g. 353861234567
-const WEB3FORMS_KEY   = 'YOUR_WEB3FORMS_KEY'; // ← paste key from web3forms.com
+const WEB3FORMS_KEY   = '51dd079f-645b-4c58-9de3-394547654d34';
 
 /* ─── State ─────────────────────────────────────────────────────────────── */
 let state = { step: 1, eircode: '', zone: null, services: [], sizeBand: 'medium', customSqm: null, windowCount: 8 };
@@ -231,6 +231,16 @@ async function handleSubmit() {
   // Open WhatsApp
   const waUrl = buildWhatsAppUrl(name, phone, state.eircode, state.services, state.low, state.high);
   window.open(waUrl, '_blank');
+
+  // GA4 conversion event
+  if (typeof gtag === 'function') {
+    gtag('event', 'generate_lead', {
+      currency: 'EUR',
+      value: Math.round((state.low + state.high) / 2),
+      services: state.services.join(','),
+      eircode: state.eircode,
+    });
+  }
 
   // Confirm to user
   btn.textContent      = '✓ Sent! Opening WhatsApp…';
