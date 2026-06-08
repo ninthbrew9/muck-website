@@ -110,7 +110,7 @@ async function submitToEmail(name, phone, email, eircode, services, low, high) {
   const payload = {
     access_key:  WEB3FORMS_KEY,
     subject:     `New Quote Request — ${serviceNames} — ${eircode}`,
-    from_name:   'MUCK Website',
+    from_name:   'MUCK Property Maintenance',
     name,
     phone,
     email:       email || 'Not provided',
