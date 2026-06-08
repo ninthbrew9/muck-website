@@ -53,7 +53,7 @@ const RATES = {
 
 const PROPERTY_SIZES = { small: 80, medium: 120, large: 200 };
 
-const WHATSAPP_NUMBER  = '353XXXXXXXXX';       // ← replace with real number e.g. 353861234567
+const WHATSAPP_NUMBER  = '353877114296';
 const WEB3FORMS_KEY   = '51dd079f-645b-4c58-9de3-394547654d34';
 
 /* ─── State ─────────────────────────────────────────────────────────────── */
