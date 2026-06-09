@@ -383,22 +383,6 @@ a { text-decoration: none; color: inherit; }
 .step h3 { font-size: 1rem; font-weight: 700; margin-bottom: 0.35rem; }
 .step p { font-size: 0.88rem; color: var(--text-light); }
 
-/* ===== ABOUT ===== */
-#about { padding: 5rem 0; background: var(--white); }
-.about-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 4rem; align-items: center; }
-.about-text p { color: var(--text-light); line-height: 1.75; margin-bottom: 1rem; }
-.about-stats { display: flex; gap: 2rem; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid #eee; }
-.about-stat { display: flex; flex-direction: column; }
-.stat-number { font-size: 1.8rem; font-weight: 700; color: var(--teal); line-height: 1; }
-.stat-label { font-size: 0.8rem; color: var(--text-light); margin-top: 0.25rem; }
-.about-image { display: flex; justify-content: center; align-items: center; }
-.about-image img { width: 100%; max-width: 380px; border-radius: var(--radius); opacity: 0.9; }
-@media (max-width: 768px) {
-  .about-inner { grid-template-columns: 1fr; gap: 2rem; }
-  .about-image { order: -1; }
-  .about-image img { max-width: 200px; }
-  .about-stats { gap: 1.5rem; }
-}
 
 /* ===== QUOTE TOOL ===== */
 #quote { padding: 5rem 0; background: #f7fafa; }
