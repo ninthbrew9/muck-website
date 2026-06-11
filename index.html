@@ -36,6 +36,9 @@
   }
   </script>
 
+  <!-- HubSpot Tracking -->
+  <script type="text/javascript" id="hs-script-loader" async defer src="//js.hs-scripts.com/148671192.js"></script>
+
   <!-- Google Analytics 4 -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-MYQP4KN151"></script>
   <script>
@@ -345,6 +348,18 @@
             <div class="custom-size">
               <label for="custom-sqm" style="font-size:0.85rem;color:#666;font-weight:500;">Or enter exact floor area (m²):</label>
               <input type="number" id="custom-sqm" placeholder="e.g. 145" min="20" max="2000" />
+            </div>
+            <!-- Gutter sides — shown only when Gutter Cleaning is ticked -->
+            <div class="gutter-sides-row" id="gutter-sides-row">
+              <span class="gutter-sides-label">How many sides to clean?</span>
+              <div class="sides-right">
+                <div class="window-counter">
+                  <button type="button" class="counter-btn" id="sides-minus">&#8722;</button>
+                  <span class="counter-value" id="sides-count-display">2</span>
+                  <button type="button" class="counter-btn" id="sides-plus">&#43;</button>
+                </div>
+                <button type="button" class="sides-reset-btn" id="sides-reset" aria-label="Reset sides to size default">&#215; reset</button>
+              </div>
             </div>
           </div>
           <div class="quote-nav">

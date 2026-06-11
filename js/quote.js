@@ -47,7 +47,7 @@ const COVERAGE = {
 const RATES = {
   pressureWashing: { perSqm: 5,   areaRatio: 0.35 },
   roofCleaning:    { perSqm: 8,   areaRatio: 0.55 },  // reduced — mid Wicklow/Wexford rate
-  gutterCleaning:  { flat: { small: 100, medium: 145, large: 195 } },
+  gutterCleaning:  { bySides: { 1: 80, 2: 110, 3: 145, 4: 175 } },
   windowCleaning:  { perWindow: 6 },                   // €6 per window, count entered by user
 };
 
@@ -57,7 +57,8 @@ const WHATSAPP_NUMBER  = '353877114296';
 const WEB3FORMS_KEY   = '51dd079f-645b-4c58-9de3-394547654d34';
 
 /* ─── State ─────────────────────────────────────────────────────────────── */
-let state = { step: 1, eircode: '', zone: null, services: [], sizeBand: 'medium', customSqm: null, windowCount: 8 };
+let sidesManuallySet = false;
+let state = { step: 1, eircode: '', zone: null, services: [], sizeBand: 'medium', customSqm: null, windowCount: 8, gutterSides: 2 };
 
 /* ─── Eircode helpers ────────────────────────────────────────────────────── */
 function parseEircode(raw) {
@@ -73,7 +74,7 @@ function getZone(routing) {
 }
 
 /* ─── Calculation ────────────────────────────────────────────────────────── */
-function calcEstimate(services, sizeBand, customSqm, windowCount) {
+function calcEstimate(services, sizeBand, customSqm, windowCount, gutterSides) {
   const sqm = customSqm || PROPERTY_SIZES[sizeBand] || PROPERTY_SIZES.medium;
   let total = 0;
 
@@ -84,7 +85,7 @@ function calcEstimate(services, sizeBand, customSqm, windowCount) {
     total += sqm * RATES.roofCleaning.areaRatio * RATES.roofCleaning.perSqm;
   }
   if (services.includes('gutters')) {
-    total += RATES.gutterCleaning.flat[sizeBand] || RATES.gutterCleaning.flat.medium;
+    total += RATES.gutterCleaning.bySides[gutterSides] || RATES.gutterCleaning.bySides[2];
   }
   if (services.includes('windows')) {
     total += (windowCount || 8) * RATES.windowCleaning.perWindow;
@@ -144,6 +145,28 @@ function setEircodeStatus(msg, type) {
   el.className = `eircode-status ${type}`;
 }
 
+function defaultSidesForSize(sizeBand, customSqm) {
+  const sqm = customSqm || PROPERTY_SIZES[sizeBand] || PROPERTY_SIZES.medium;
+  if (sqm > 200) return 4;
+  if (sqm >= 150) return 3;
+  return 2;
+}
+
+function updateSidesDisplay(n) {
+  document.getElementById('sides-count-display').textContent = n;
+  document.getElementById('sides-reset').style.display = sidesManuallySet ? 'inline' : 'none';
+}
+
+function applySidesDefault() {
+  if (sidesManuallySet) return;
+  const sizeRadio = document.querySelector('.size-radio:checked');
+  const customVal = parseInt(document.getElementById('custom-sqm').value, 10);
+  const sizeBand  = sizeRadio ? sizeRadio.value : 'medium';
+  const customSqm = (!isNaN(customVal) && customVal > 0) ? customVal : null;
+  state.gutterSides = defaultSidesForSize(sizeBand, customSqm);
+  updateSidesDisplay(state.gutterSides);
+}
+
 /* ─── Step navigation ────────────────────────────────────────────────────── */
 function goStep2() {
   const raw = document.getElementById('eircode-input').value.trim();
@@ -173,6 +196,9 @@ function goStep3() {
     return;
   }
   state.services = checked;
+  const hasGutters = checked.includes('gutters');
+  document.getElementById('gutter-sides-row').classList.toggle('visible', hasGutters);
+  if (hasGutters) applySidesDefault();
   showPanel(3);
 }
 
@@ -183,7 +209,7 @@ function goResult() {
   state.sizeBand  = sizeRadio ? sizeRadio.value : 'medium';
   state.customSqm = (!isNaN(customVal) && customVal > 0) ? customVal : null;
 
-  const { low, high } = calcEstimate(state.services, state.sizeBand, state.customSqm, state.windowCount);
+  const { low, high } = calcEstimate(state.services, state.sizeBand, state.customSqm, state.windowCount, state.gutterSides);
   state.low  = low;
   state.high = high;
 
@@ -249,9 +275,13 @@ async function handleSubmit() {
 }
 
 function resetQuote() {
-  state = { step: 1, eircode: '', zone: null, services: [], sizeBand: 'medium', customSqm: null, windowCount: 8, low: 0, high: 0 };
+  sidesManuallySet = false;
+  state = { step: 1, eircode: '', zone: null, services: [], sizeBand: 'medium', customSqm: null, windowCount: 8, gutterSides: 2, low: 0, high: 0 };
   document.getElementById('window-count-display').textContent = '8';
   document.getElementById('window-count-row').classList.remove('visible');
+  document.getElementById('sides-count-display').textContent = '2';
+  document.getElementById('gutter-sides-row').classList.remove('visible');
+  document.getElementById('sides-reset').style.display = 'none';
   const btn = document.getElementById('result-submit-btn');
   btn.disabled    = false;
   btn.innerHTML   = '<svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg> Send Quote &amp; Book on WhatsApp';
@@ -301,9 +331,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const cb = label.querySelector('input');
     cb.addEventListener('change', () => {
       label.classList.toggle('checked', cb.checked);
-      // Show/hide window counter
       if (cb.value === 'windows') {
         document.getElementById('window-count-row').classList.toggle('visible', cb.checked);
+      }
+      if (cb.value === 'gutters') {
+        if (!cb.checked) {
+          sidesManuallySet = false;
+        } else {
+          applySidesDefault();
+        }
       }
     });
   });
@@ -322,12 +358,38 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
-  /* Size radio visual */
+  /* Gutter sides counter buttons */
+  document.getElementById('sides-minus').addEventListener('click', () => {
+    if (state.gutterSides > 1) {
+      sidesManuallySet = true;
+      state.gutterSides--;
+      updateSidesDisplay(state.gutterSides);
+    }
+  });
+  document.getElementById('sides-plus').addEventListener('click', () => {
+    if (state.gutterSides < 4) {
+      sidesManuallySet = true;
+      state.gutterSides++;
+      updateSidesDisplay(state.gutterSides);
+    }
+  });
+  document.getElementById('sides-reset').addEventListener('click', () => {
+    sidesManuallySet = false;
+    applySidesDefault();
+  });
+
+  /* Size radio — visual + sides auto-update */
   document.querySelectorAll('.size-radio').forEach(r => {
     r.addEventListener('change', () => {
       document.querySelectorAll('.size-label').forEach(l => l.classList.remove('selected'));
       r.closest('.size-label').classList.add('selected');
+      applySidesDefault();
     });
+  });
+
+  /* Custom sqm — sides auto-update */
+  document.getElementById('custom-sqm').addEventListener('input', () => {
+    applySidesDefault();
   });
 
   /* Wire buttons */

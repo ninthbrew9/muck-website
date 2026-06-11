@@ -466,6 +466,33 @@ a { text-decoration: none; color: inherit; }
   animation: fadeSlide 0.25s ease;
 }
 .window-count-row.visible { display: flex; }
+.gutter-sides-row {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: #f0fafa;
+  border: 1.5px solid var(--teal);
+  border-radius: var(--radius);
+  animation: fadeSlide 0.25s ease;
+}
+.gutter-sides-row.visible { display: flex; }
+.gutter-sides-label { font-weight: 600; font-size: 0.95rem; }
+.sides-right { display: flex; align-items: center; gap: 0.75rem; }
+.sides-reset-btn {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--teal);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.15rem 0.35rem;
+  text-decoration: underline;
+  white-space: nowrap;
+}
+.sides-reset-btn:hover { color: var(--green-dark); }
 .window-count-label { font-weight: 600; font-size: 0.95rem; }
 .window-counter { display: flex; align-items: center; gap: 0.75rem; }
 .counter-btn {
