@@ -686,3 +686,29 @@ a { text-decoration: none; color: inherit; }
 
   .hero-ctas { flex-direction: column; align-items: center; }
 }
+
+/* ===== FAQ ===== */
+.muck-faq{
+  --muck-ink:#16242a;
+  --muck-muted:#5b6f74;
+  --muck-accent:#2BBFBF;
+  --muck-line:#e3e9ea;
+  --muck-bg:#ffffff;
+  max-width:760px;margin:0 auto;padding:72px 22px;color:var(--muck-ink);
+}
+.muck-faq__eyebrow{font-size:0.78rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muck-accent);margin:0 0 10px;}
+.muck-faq__title{font-size:clamp(1.6rem,4vw,2.4rem);line-height:1.08;font-weight:800;letter-spacing:-.5px;margin:0 0 8px;}
+.muck-faq__intro{font-size:15px;color:var(--muck-muted);margin:0 0 34px;max-width:54ch;}
+.muck-faq details{border-bottom:1px solid var(--muck-line);background:var(--muck-bg);}
+.muck-faq details:first-of-type{border-top:1px solid var(--muck-line);}
+.muck-faq summary{list-style:none;cursor:pointer;padding:22px 44px 22px 4px;position:relative;font-size:17px;font-weight:650;line-height:1.35;color:var(--muck-ink);transition:color .15s ease;}
+.muck-faq summary::-webkit-details-marker{display:none;}
+.muck-faq summary:hover{color:var(--muck-accent);}
+.muck-faq summary:focus-visible{outline:2px solid var(--muck-accent);outline-offset:3px;border-radius:3px;}
+.muck-faq summary::after{content:"";position:absolute;right:8px;top:50%;width:14px;height:14px;margin-top:-7px;background:linear-gradient(var(--muck-accent),var(--muck-accent)) center/14px 2px no-repeat,linear-gradient(var(--muck-accent),var(--muck-accent)) center/2px 14px no-repeat;transition:transform .25s ease;}
+.muck-faq details[open] summary::after{transform:rotate(135deg);}
+.muck-faq__answer{padding:0 44px 24px 4px;font-size:15px;line-height:1.65;color:var(--muck-muted);margin:0;}
+@media (prefers-reduced-motion:no-preference){
+  .muck-faq details[open] .muck-faq__answer{animation:muckReveal .28s ease;}
+  @keyframes muckReveal{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+}
